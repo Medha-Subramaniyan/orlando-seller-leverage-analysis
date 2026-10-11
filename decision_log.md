@@ -53,6 +53,23 @@
 - price trend ($/sq ft) isn't in the score. that's a deliberate scope choice: it's context for talking points
 - noise = per-zip sd(month-to-month change) ÷ sd(level), median across zips. higher = noisier
 
+### Leverage score: how it's built
+
+- **flip:** months of supply, both DOMs and price cut share are multiplied by −1 (higher = worse for sellers). sale-to-list is **not** flipped (higher already = better for sellers). (the earlier plan said "flip sale-to-list", which only works if higher score = *less* leverage; we use higher = more)
+- **reference:** every zip × window labeled 2021-08 through 2026-08 (jun–aug 2021 to jun–aug 2026) = 20 zips × 61 windows = 1,220 rows. the same fixed mean/SD are applied to every window, including 2019
+
+| Input | Reference mean | Reference SD |
+|---|---|---|
+| months of supply | 3.10 | 1.75 |
+| realtor.com DOM | 53.7 | 16.6 |
+| redfin DOM | 30.7 | 17.9 |
+| price cut share (%) | 18.5 | 6.98 |
+| sale-to-list (%) | 98.03 | 1.53 |
+
+- 0 = the average zip-window in the study period; +1 = 1 SD more seller leverage
+- **checks:** every flipped input correlates positively with the score (0.64–0.89). main score and option 2 correlate 0.98. metro median score: mar–may 2022 1.41, jun–aug 2021 1.24, jun–aug 2019 0.17, mar–may 2026 −0.40, jun–aug 2026 −0.65
+- outputs: `data/processed/orlando_scores_monthly.csv`, `data/processed/orlando_scores_windows.csv`
+
 ## On building the joined data
 
 - **realtor.com 3-month averages:** each month M = average of M−2, M−1, M for the same zip, labeled M (same span as the redfin window labeled M). windows with fewer than 3 months are left empty, so each zip's first 2 months (jul, aug 2016) are blank
